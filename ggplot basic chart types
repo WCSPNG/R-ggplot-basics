@@ -1,0 +1,89 @@
+library(ggplot2)
+
+# Make some variables for a dataframe
+
+# Set up a pseudo-design matrix for our animals
+animal <- c(rep(c("Horse","Dog","Dolphin"),100))
+
+# Beta coefficients - to save time I'm stipulating 3 intercepts (for each animal) within the columns
+Bintteeth 	<- c(rep(c(36,42,80),100))
+Bintweight	<- c(rep(c(220,52,160),100))
+Binteye	<- c(rep(c(70,20,15),100))
+
+# Error
+Errorteeth	<- rnorm(300,0,Bintteeth /5)
+Errorweight <- rnorm(300,0,Bintweight /5)
+Erroreye 	<- rnorm(300,0,Binteye /5)
+
+# actual equation
+eyelashes	<- Binteye 		+ Erroreye 
+weight	<- Bintweight 	+ Errorweight 
+teeth		<- Bintteeth  	+ Errorteeth	
+
+# now make a data frame
+mydataframe<-data.frame(animal, eyelashes,weight,teeth)
+
+### Time to Plot... ###
+
+# Make standard plot using Base R
+plot(teeth~eyelashes, data=mydataframe)
+
+# Now let's use ggplot same graph different notation
+# points
+ggplot()+geom_point(data=mydataframe, aes(x=eyelashes, y=teeth))
+
+# abline (a line which we stipulate by slope and intercept)
+ggplot()+geom_point(data=mydataframe, aes(x=eyelashes, y=teeth))+
+geom_abline(intercept=2, slope=2, colour="red")
+
+# splitting by facet_grid
+ggplot()+geom_point(data=mydataframe, aes(x=eyelashes, y=teeth))+facet_grid(. ~ animal)
+
+# contour2d
+ggplot()+geom_density2d(data=mydataframe, aes(x=eyelashes, y=teeth))+facet_grid(. ~ animal)
+
+# lines (following sequence in dataframe)
+ggplot()+geom_line(data=mydataframe, aes(x=teeth, y=weight))+facet_grid(. ~ animal)
+
+# histogram facetted
+ggplot()+geom_histogram(data=mydataframe, aes(x=teeth, fill=animal))+facet_grid(. ~ animal)
+
+# histogram dodged
+ggplot()+geom_histogram(data=mydataframe, aes(x=teeth, fill=animal), position="dodge")
+
+# density plot
+ggplot()+geom_density(data=mydataframe, aes(x=teeth, fill=animal), alpha=0.2)
+
+# box plots
+ggplot()+geom_boxplot(data=mydataframe, aes(x=animal,y=teeth))
+
+# violin plot (let's add fill = animal for a bit of colour)
+ggplot()+geom_violin(data=mydataframe, aes(x=animal,y=teeth, fill=animal))
+
+### Basic Mapping (using polygons) ###
+
+# maps = polygons
+# need the "map" library for this example
+library(maps)
+
+# make a dataframe
+all_states <- map_data("state")
+head(all_states)
+
+# plot polygon
+ggplot()+
+geom_polygon(data=all_states, aes(x=long, y=lat, group = group),colour="white", fill="grey10")
+
+# make coords equal using coord_equal()
+ggplot()+
+geom_polygon(data=all_states, aes(x=long, y=lat, group = group),colour="white", fill="grey10")+coord_equal()
+
+# make coords equal using coord_equal()
+ggplot()+
+geom_polygon(data=all_states, aes(x=long, y=lat, group = group, fill=region),colour="white")+coord_equal()
+
+# hide background grid/panelling and legend
+ggplot()+
+geom_polygon(data=all_states, aes(x=long, y=lat, group = group, fill=region),colour="white")+coord_equal()+
+theme_bw()+
+guides(fill=FALSE)
